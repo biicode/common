@@ -1,0 +1,7 @@
+This a ISO-8859-15 file. This contain a special characters like:
+α ι ν σ ϊ '
+ΰ θ μ ς ω `
+? @ » ί ? ? ¶ « Ά ?nµ?πί¤¶@?¶@@¶
+ό φ λ ο ό "
+~ 
+Yeah!!!

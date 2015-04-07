@@ -1,0 +1,7 @@
+#################COMMON REQUIREMENTS##################
+pytz==2013b
+https://python-graph.googlecode.com/files/python-graph-core-1.8.2.tar.gz
+pyyaml==3.10
+ply
+pymongo==2.7
+#################END COMMON REQUIREMENTS##############

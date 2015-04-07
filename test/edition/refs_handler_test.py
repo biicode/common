@@ -1,0 +1,16 @@
+from biicode.common.model.symbolic.block_version import BlockVersion
+
+a1 = BlockVersion.loads('user0/blocka: 1')
+a2 = BlockVersion.loads('user0/blocka: 2')
+an = BlockVersion.loads('user0/blocka')
+b1 = BlockVersion.loads('user0/blockb: 1')
+b2 = BlockVersion.loads('user0/blockb: 2')
+bn = BlockVersion.loads('user0/blockb')
+c1 = BlockVersion.loads('user0/blockc: 1')
+cn = BlockVersion.loads('user0/blockc')
+c2 = BlockVersion.loads('user0/blockc: 2')
+c3 = BlockVersion.loads('user0/blockc: 3')
+d1 = BlockVersion.loads('user0/blockd: 1')
+dn = BlockVersion.loads('user0/blockd')
+e1 = BlockVersion.loads('user0/blocke(user1/branch): 1')
+en = BlockVersion.loads('user0/blocke(user1/branch)')

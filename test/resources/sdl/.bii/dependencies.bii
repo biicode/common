@@ -1,0 +1,8 @@
+{"src/audio/sdl_audio.c": [	"src/audio/windib/sdl_dibaudio.c",	
+							"src/audio/dummy/sdl_dummyaudio.c",	
+							"src/audio/disk/sdl_diskaudio.c" ],
+"src/video/sdl_video.c": [	"src/video/windib/sdl_dibvideo.c",	
+							"src/video/dummy/sdl_nullvideo.c" ],
+"include/sdl.h": ["src/main/win32/SDL_win32_main.c"]
+}
+

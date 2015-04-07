@@ -1,0 +1,6 @@
+def func(settings):
+	"""hello.h, hello.cpp"""
+	if settings.user.get('test'):
+		return "test"
+	else:
+		return "develop"

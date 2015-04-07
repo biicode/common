@@ -1,0 +1,7 @@
+def func(settings):
+	"""sphere.h, sphere.cpp"""
+	if settings.user.get('test'):
+		return "test"
+	else:
+		return "develop"
+
