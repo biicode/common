@@ -2,8 +2,6 @@ import os
 import logging
 from biicode.common.conf.configure_environment import get_env
 
-#Note: This file is being automatically substituted via regex for automating
-#release to develop. Actually pattern "logging.DEBUG" is being substituted
 BII_LOGGING_LEVEL = get_env('BII_LOGGING_LEVEL', logging.CRITICAL)
 BII_LOGGING_FILE = get_env('BII_LOGGING_FILE', None)  # None is stdout
 BII_TRACE_ERRORS = get_env('BII_TRACE_ERRORS', False)
