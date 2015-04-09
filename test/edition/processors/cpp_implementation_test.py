@@ -135,6 +135,21 @@ LexicalHandler::~LexicalHandler()
 } } // namespace Poco::XML
 """
 
+using_ns_body = """using blobstore::onblocks::utils::ceilDivision;"""
+
+using_ns_header = """namespace blobstore {
+namespace onblocks {
+namespace utils {
+
+uint32_t intPow(uint32_t base, uint32_t exponent);
+uint32_t ceilDivision(uint32_t dividend, uint32_t divisor);
+uint32_t maxZeroSubtraction(uint32_t minuend, uint32_t subtrahend);
+
+}
+}
+}
+"""
+
 
 class CPPImplementationProcessorTest(BiiTestCase):
     '''tests de CPPImplementation processor from 2 sources, from some source files in tests folder
@@ -241,6 +256,7 @@ class CPPImplementationProcessorTest(BiiTestCase):
         ('', ''),
         (crypto_header, ''),
         ('', basic_class_body),
+        (using_ns_header, using_ns_body)
     ])
     def test_negative(self, header, source):
         '''some basic negative tests, from snippets of code'''

@@ -199,6 +199,9 @@ class FileParser(object):
             declarations.add(CPPItem(CPPItem.STRUCT, name, scope))
             return
 
+        if 'using' in tokens:
+            return
+
         if 'extern' in tokens and statement[1] is not None:  # for extern "C" { constructs
             self.recursive_parser(statement[1], scope, declarations, definitions)
 
