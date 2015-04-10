@@ -1,7 +1,6 @@
 import unittest
 from biicode.common.edition.parsing.cpp.drl_parser import DRLCPPParser
-from biicode.common.model.blob import Blob
-from nose_parameterized import parameterized #@UnresolvedImport
+from nose_parameterized import parameterized
 
 
 class CPPParserTest(unittest.TestCase):
@@ -42,6 +41,7 @@ int main() {
 }
 
 """
+
     @parameterized.expand([
         (int_main, ),
         (void_main, ),
@@ -72,5 +72,3 @@ const word32 CAST::S[8][256] = {
 """
         parser = DRLCPPParser()
         parser.parse(text)
-        pass
-        #self.assertTrue(parser.)

@@ -276,6 +276,13 @@ int c = 8;
         self.assertIn(CPPDeclaration('../include/gtest/internal/gtest-port.h'),
                       parser.explicit_declarations)
 
+    def test_using_no_definition(self):
+        code = "using blobstore::onblocks::utils::ceilDivision;"
+        parser = DRLCPPParser()
+        parser.parse(code)
+        expected = set()
+        self.assertItemsEqual(expected, parser.definitions)
+
     def test_scope_in_const_definition(self):
         code = """
 #include "cryptopp/cryptopp/pch.h"
