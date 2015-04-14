@@ -1,0 +1,6 @@
+def func(settings):
+	"""hello.f90"""
+	if settings.user.get('test'):
+		return "test"
+	else:
+		return "develop"
