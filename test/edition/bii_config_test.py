@@ -63,13 +63,18 @@ general = """
     # test4.cpp
     test1.cpp
 
+[cpp-std]
+    c++11 PRIVATE
+    # c++14
+    c++14
+
 [hooks]
 post: bii/myhook.py
-
 
 [data]
 
 #FALSE
+
 
 """
 
@@ -114,6 +119,7 @@ class BiiConfigTest(BiiTestCase):
                                              ])
         self.assert_bii_equal(config.tests, ["test.cpp", "test1.cpp"])
         self.assertEqual(config.paths, ["/", "include"])
+        self.assertEqual(config.cpp_std, ["c++11 PRIVATE", "c++14"])
 
     def requirements_update_test(self):
         block_name = BlockName("user/block")

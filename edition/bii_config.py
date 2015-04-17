@@ -49,6 +49,9 @@ template = r"""# Biicode configuration file
     # Mapping of include patterns to external blocks
     # hello*.h: user3/depblock  # includes will be processed as user3/depblock/hello*.h
 
+[cpp-std]
+    # Add C++11, C++14, etc flags
+
 [data]
     # Manually define data files dependencies, that will be copied to bin for execution
     # By default they are copied to bin/user/block/... which should be taken into account
@@ -83,7 +86,7 @@ class IncludesMapping(list):
 
 class BiiConfig(object):
     sections = ['parent', 'requirements', 'paths', 'data', 'hooks', 'dependencies', 'includes',
-                'mains', 'tests']
+                'mains', 'tests', 'cpp-std']
 
     def __init__(self, text):
         """ Create memory representation (parsing) of biicode block configuration file
@@ -102,6 +105,7 @@ class BiiConfig(object):
         self.includes = []
         self.data = []  # Can be sets
         self.tests = []
+        self.cpp_std = []
 
         self._parse()
 
@@ -119,7 +123,7 @@ class BiiConfig(object):
                 self.tests != other.tests)
 
     def _find_sections(self):
-        pattern = re.compile("^\[([a-z]{2,50})\]")
+        pattern = re.compile("^\[([a-z]{1,25}-?[a-z]{1,25})\]")
         current_lines = []
         sections = {}
         Section = namedtuple("Section", "line content headline")
@@ -187,6 +191,12 @@ class BiiConfig(object):
         includes = sections.get('includes')
         if includes:
             self.includes = IncludesMapping.loads(includes.content, includes.line)
+
+        cpp_std = sections.get('cpp-std')
+        if cpp_std:
+            def cpp_std_line_parser(line):
+                self.cpp_std.append(line)
+            parse(cpp_std.content, cpp_std_line_parser, cpp_std.line)
 
     def _dump_requirements(self, sections):
         if self.requirements != self._old_requirements:
