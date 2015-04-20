@@ -95,7 +95,11 @@ class Blob(object):
             return "BinaryContent"
         return self.binary
 
-    #TODO: test
+    @property
+    def bytes(self):
+        return len(self.binary)
+
+    # TODO: test
     def similarity(self, other):
         if self.sha == other.sha:
             return 1.0
