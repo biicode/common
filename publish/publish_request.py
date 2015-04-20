@@ -37,7 +37,8 @@ class PublishRequest(object):
     @property
     def bytes(self):
         if not self._bytes:
-            self._bytes = sum([content.load.bytes for content in self.contents.itervalues()])
+            self._bytes = sum([content.load.bytes
+                               for content in self.contents.itervalues() if content])
 
         return self._bytes
 
