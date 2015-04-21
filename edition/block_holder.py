@@ -36,7 +36,7 @@ class BlockHolder(object):
         if self._config is None:
             try:
                 res = self._resources[BIICODE_FILE]
-                content = res.content.load.text
+                content = res.content.load.bytes
             except KeyError:
                 content = None
             try:

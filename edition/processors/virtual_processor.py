@@ -24,7 +24,7 @@ class VirtualConfigurationProcessor(object):
             realizations = set()
             try:
                 virtual_bii = block_holder[self.virtual_file]
-                virtual = virtualparser.parseFile(virtual_bii.content.load.text)
+                virtual = virtualparser.parseFile(virtual_bii.content.load.bytes)
                 self._process_virtual_config(block_name, virtual, virtuals, realizations, biiout)
             except KeyError:
                 logger.debug('No virtual config in %s' % block_name)

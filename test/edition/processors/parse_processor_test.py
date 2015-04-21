@@ -5,6 +5,7 @@ from biicode.common.edition.processors.parse_processor import ParseProcessor
 from biicode.common.model.bii_type import CPP
 from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from biicode.common.output_stream import OutputStream
+from biicode.common.model.blob import Blob
 
 
 class ParseProcessorTest(BiiTestCase):
@@ -19,9 +20,9 @@ class ParseProcessorTest(BiiTestCase):
         self.check_dependency_set(main.dependencies, unresolved=['iostream', 'sphere.h'])
 
         # now remove #include
-        load = block_holder['main.cpp'].content.load
-        load.replace('#include "sphere.h"', '')
-        block_holder['main.cpp'].content.load = load
+        load = block_holder['main.cpp'].content.load.bytes
+        load = load.replace('#include "sphere.h"', '')
+        block_holder['main.cpp'].content.load = Blob(load)
 
         processor.do_process(block_holder, changes, OutputStream())
         self.check_dependency_set(main.dependencies, unresolved=['iostream'])

@@ -37,7 +37,7 @@ class PublishRequest(object):
     @property
     def bytes(self):
         if not self._bytes:
-            self._bytes = sum([content.load.bytes
+            self._bytes = sum([content.load.size
                                for content in self.contents.itervalues() if content])
 
         return self._bytes
@@ -138,6 +138,9 @@ class PublishRequest(object):
         return pp
 
     def serialize(self):
+        for c in self.contents.itervalues():
+            if c is not None:
+                c.load.serialize_bytes = True
         ret = Serializer().build(
                  (PublishRequest.SERIAL_TRACKED_KEY, self.parent),
                  (PublishRequest.SERIAL_PARENT_DATETIME, self.parent_time),

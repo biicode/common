@@ -37,7 +37,7 @@ class ResourcesMergeTest(unittest.TestCase):
         output = OutputStream()
         merger = BlobsMerger("user/block1#1", "user/block1#2", output)
         ret = merger.merge(base, other, self.common)
-        self.assertEquals(ret['user/block1/file1.h'].text,
+        self.assertEquals(ret['user/block1/file1.h'].bytes,
 '''<<<<<<<<<<<<<<<<<<<<<<<<< user/block1#1
 @modified1
 =========================
