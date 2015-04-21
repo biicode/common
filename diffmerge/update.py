@@ -14,8 +14,8 @@ class BlobsMerger(SetThreeWayMerge):
             self._biiout.warn("Can't merge binary contents, your file is keeped.")
             return base_blob, True
 
-        common_text = None if common_blob is None else common_blob.text
-        text, conflict = three_way_merge_text(common_text, base_blob.text, other_blob.text,
+        common_text = None if common_blob is None else common_blob.bytes
+        text, conflict = three_way_merge_text(common_text, base_blob.bytes, other_blob.bytes,
                                               self.base_name, self.other_name)
         return Blob(text), conflict
 

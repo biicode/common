@@ -13,14 +13,14 @@ def content_diff(base, other, baseName='base', otherName='other'):
     if base:
         if base.load.is_binary:
             return 'Unable to diff binary contents of %s' % baseName
-        textBase = base.load.text
+        textBase = base.load.bytes
     else:
         textBase = ""
 
     if other:
         if other.load.is_binary:
             return 'Unable to diff binary contents of %s' % baseName
-        textOther = other.load.text
+        textOther = other.load.bytes
     else:
         textOther = ""
     if textBase == textOther:
@@ -54,6 +54,11 @@ class Content(object):
     def load(self, load):
         self._load = load
         self._is_parsed = False
+
+    def set_blob(self, blob):
+        """ setter bypassing invalidation of parser
+        """
+        self._load = blob
 
     def similarity(self, other):
         # published resource
@@ -90,7 +95,7 @@ class Content(object):
 
     def parse(self):
         if self.parser and not self._is_parsed:
-            self.parser.parse(self._load.text)
+            self.parser.parse(self._load.bytes)
             self._is_parsed = True
             return True
         return False
@@ -100,9 +105,9 @@ class Content(object):
         assert isinstance(decl, Declaration)
         assert isinstance(new_decl, Declaration)
         #if self.parser and new_decl:
-        new_text = self.parser.updateDeclaration(self._load.text, decl, new_decl)
+        new_text = self.parser.updateDeclaration(self._load.bytes, decl, new_decl)
         if new_text:
-            self._load.text = new_text
+            self._load = Blob(new_text)
             return True
         return False
 

@@ -12,6 +12,7 @@ from biicode.common.edition.parsing.factory import parser_factory
 from biicode.common.edition.block_holder import BlockHolder
 from biicode.common.model.id import UserID
 from biicode.common.edition.processors.processor_changes import ProcessorChanges
+from biicode.common.utils.file_utils import load
 
 
 def make_content(brl, lang=BiiType(UNKNOWN), read_file=True):
@@ -26,7 +27,9 @@ def make_content(brl, lang=BiiType(UNKNOWN), read_file=True):
         name = '/'.join(brl.split('/')[1:])
         parser = parser_factory(lang, brl.split('/')[-1])
     if read_file:
-        blob = Blob(path=testfileutils.file_path(name), is_binary=binary)
+        path = testfileutils.file_path(name)
+        content = load(path)
+        blob = Blob(content, is_binary=binary)
     else:
         blob = Blob("Blob example content", is_binary=binary)
     return Content(brl, blob, parser)

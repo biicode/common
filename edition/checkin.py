@@ -42,6 +42,8 @@ def checkin_block_files(hive_holder, block_name, files, processor_changes, biiou
             if content is None or blob != content.load:
                 content = Content(block_cell_name, load=blob)
                 processor_changes.upsert(block_cell_name, content)
+            else:
+                content.set_blob(blob)
 
         resource = Resource(cell, content)
         block_holder.add_resource(resource)

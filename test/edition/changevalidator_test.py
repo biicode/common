@@ -12,12 +12,9 @@ from biicode.common.model.content import Content
 
 class ChangeValidatorTest(unittest.TestCase):
 
-    def setUp(self):
-        self.load = Blob()
-
     def test_large_cell_reject(self):
-        self.load.binary = bytearray(BII_FILE_SIZE_LIMIT)
-        files = {"user/block/file": (None, self.load)}
+        load = Blob("x" * (BII_FILE_SIZE_LIMIT))
+        files = {"user/block/file": (None, load)}
 
         biiout = OutputStream()
         changevalidator.remove_large_cells(files, biiout)
@@ -27,10 +24,9 @@ class ChangeValidatorTest(unittest.TestCase):
                           str(biiout))
 
     def test_size_reject_accept(self):
-        self.load.binary = bytearray(BII_FILE_SIZE_LIMIT)
-        load2 = Blob()
-        load2.binary = bytearray(BII_FILE_SIZE_LIMIT - 1)
-        files = {"user/block/filelarge":  (None, self.load),
+        load = Blob("x" * BII_FILE_SIZE_LIMIT)
+        load2 = Blob("x" * (BII_FILE_SIZE_LIMIT - 1))
+        files = {"user/block/filelarge":  (None, load),
                  "user/block/filesmall": (None, load2)}
 
         biiout = OutputStream()
