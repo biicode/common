@@ -55,6 +55,10 @@ class BlockHolder(object):
         return self.config.tests
 
     @property
+    def cpp_std(self):
+        return self.config.cpp_std
+
+    @property
     def data(self):
         return self.config.data
 

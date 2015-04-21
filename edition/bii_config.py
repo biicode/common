@@ -50,7 +50,9 @@ template = r"""# Biicode configuration file
     # hello*.h: user3/depblock  # includes will be processed as user3/depblock/hello*.h
 
 [cpp-std]
-    # Add C++11, C++14, etc flags
+    # Add c++11, c++14, etc flags to any target (by default, BII_LIB_TARGET)
+    # c++11 NO_REQUIRED PRIVATE
+    # c++14 TARGET phil_superblock_main
 
 [data]
     # Manually define data files dependencies, that will be copied to bin for execution
