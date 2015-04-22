@@ -98,7 +98,7 @@ def _check_input(hive_holder, block_name):
     if block_name not in hive_holder.blocks:
         raise PublishException('Block "%s" does not exist in your project' % block_name)
 
-    hive_dependencies = hive_holder.hive.hive_dependencies
+    hive_dependencies = hive_holder.hive_dependencies
     gr = hive_dependencies.version_graph
     cycles = gr.get_cycles()
     if cycles:

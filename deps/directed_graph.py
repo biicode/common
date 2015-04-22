@@ -1,42 +1,11 @@
 from pygraph.classes.digraph import digraph
 from pygraph.algorithms.sorting import topological_sorting
 from pygraph.algorithms.cycles import find_cycle
-from biicode.common.utils.serializer import Serializer, SetDeserializer, serialize
 from collections import namedtuple
 
 
 class Edge(namedtuple('Edge', ['source', 'target', 'value'])):
-    def serialize(self):
-        if self.value:
-            return (serialize(self.source), serialize(self.target), serialize(self.value))
-        else:
-            return (serialize(self.source), serialize(self.target))
-
-
-class EdgeDeserializer(object):
-    def __init__(self, node_class, edge_class):
-        self.edge_class = edge_class
-        self.node_class = node_class
-
-    def deserialize(self, data):
-        if data is None:
-            return None
-
-        if callable(getattr(self.node_class, "deserialize", None)):
-            source = self.node_class.deserialize(data[0])
-            target = self.node_class.deserialize(data[1])
-        else:
-            source = self.node_class(data[0])
-            target = self.node_class(data[1])
-
-        if self.edge_class and len(data) > 2:
-            if callable(getattr(self.edge_class, "deserialize", None)):
-                value = self.edge_class.deserialize(data[2])
-            else:
-                value = data[2]
-        else:
-            value = None
-        return Edge(source, target, value)
+    pass
 
 
 class DirectedGraph(object):
@@ -207,29 +176,3 @@ class DirectedGraph(object):
             for n in add_edges_nodes:
                 result.add_edge(n, elem)
         return result
-
-    SERIAL_NODES = "n"
-    SERIAL_EDGES = "e"
-
-    def serialize(self):
-        res = Serializer().build(
-            (DirectedGraph.SERIAL_NODES, self.nodes),
-            (DirectedGraph.SERIAL_EDGES, self.edges),
-        )
-        return res
-
-
-class DirectedGraphDeserializer(object):
-    def __init__(self, node_class, edge_class=None, cls=DirectedGraph):
-        self.cls = cls
-        self.node_class = node_class
-        self.edge_class = edge_class
-
-    def deserialize(self, data):
-        if data is None:
-            return None
-        g = self.cls()
-        g.nodes = SetDeserializer(self.node_class).deserialize(data[DirectedGraph.SERIAL_NODES])
-        items_deserializer = EdgeDeserializer(self.node_class, self.edge_class)
-        g.edges = SetDeserializer(items_deserializer).deserialize(data[DirectedGraph.SERIAL_EDGES])
-        return g

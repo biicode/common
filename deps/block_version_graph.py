@@ -1,5 +1,4 @@
-from biicode.common.deps.directed_graph import DirectedGraph, DirectedGraphDeserializer
-from biicode.common.model.symbolic.block_version import BlockVersion
+from biicode.common.deps.directed_graph import DirectedGraph
 from collections import defaultdict
 
 
@@ -14,11 +13,6 @@ class BlockVersionGraph(DirectedGraph):
         for node in self.nodes:
             result[node.block_name].add(node)
         return result
-
-    @staticmethod
-    def deserialize(data):
-        deserializer = DirectedGraphDeserializer(BlockVersion, cls=BlockVersionGraph)
-        return deserializer.deserialize(data)
 
     def collision(self, other):
         '''computation of the minimum graph that contains possible sources of incompatibilities
