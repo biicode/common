@@ -6,7 +6,7 @@ from biicode.common.model.symbolic.block_version import BlockVersion
 
 
 def select_version(hive_holder, biiapi, biiout, block_name, track, time, version_tag):
-    dependencies = hive_holder.hive.hive_dependencies.dep_graph.nodes
+    dependencies = hive_holder.hive_dependencies.dep_graph.nodes
     dep_block_versions = {x.block_name: x for x in dependencies}
     existing_version = dep_block_versions.get(block_name)
     if existing_version:

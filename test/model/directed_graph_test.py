@@ -1,6 +1,5 @@
 import unittest
-
-from biicode.common.deps.directed_graph import DirectedGraph, DirectedGraphDeserializer
+from biicode.common.deps.directed_graph import DirectedGraph
 from biicode.common.model.brl.block_name import BlockName
 
 
@@ -136,23 +135,3 @@ class DirectedGraphTest(unittest.TestCase):
         # Inverse closure
         self.assertEqual({31}, gr.inverse_reachable_subgraph(31).nodes)
         self.assertEqual({11, 22, 31, 1}, gr.inverse_reachable_subgraph(1).nodes)
-
-    def test_serialize(self):
-        gr = DirectedGraph()
-        gr.add_nodes([1, 2, 3, 11, 12, 21, 22, 23, 31])
-
-        gr.add_edge(11, 1)
-        gr.add_edge(12, 2)
-        gr.add_edge(21, 12)
-        gr.add_edge(22, 11)
-        gr.add_edge(31, 21)
-        gr.add_edge(31, 22)
-        gr.add_edge(31, 23)
-
-        s = gr.serialize()
-        gr2 = DirectedGraphDeserializer(int).deserialize(s)
-        self.assertEquals(gr, gr2)
-
-if __name__ == "__main__":
-    # import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()

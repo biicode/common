@@ -1,6 +1,5 @@
 from biicode.common.model.brl.block_name import BlockName
-from biicode.common.edition.hiveprocessor import (blocks_process, deps_process,
-                                                  compute_src_graph, compute_common_table)
+from biicode.common.edition.hiveprocessor import blocks_process, deps_process
 from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from biicode.common.edition.checkin import checkin_files, checkin_block_files
 from biicode.common.exception import BiiException, UpToDatePublishException,\
@@ -89,7 +88,7 @@ class HiveManager(object):
         return version
 
     def _publish_all(self, tag, msg, versiontag):
-        src_graph = self.hive_holder.hive.hive_dependencies.src_graph
+        src_graph = self.hive_holder.hive_dependencies.src_graph
         levels = src_graph.get_levels()
         versions = []
         for level in levels:
@@ -115,8 +114,7 @@ class HiveManager(object):
 
     @property
     def closure(self):
-        hive = self.hive
-        return hive.hive_dependencies.closure
+        return self.hive_holder.hive_dependencies.closure
 
     def update(self, block_name=None, time=None):
         """ a block is outdated, because someone has published from another location,
