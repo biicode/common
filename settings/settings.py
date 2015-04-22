@@ -12,13 +12,24 @@ from biicode.common.settings.cmakesettings import CMakeSettings
 
 
 class UserSettings(dict):
+
+    def __init__(self, *args, **kwargs):
+        self["autocrlf"] = True  # Default, overrided if exists in args dict
+        dict.__init__(self, *args, **kwargs)
+
     def serialize(self):
         return dict(self)
 
     @staticmethod
     def deserialize(data):
         deserializer = DictDeserializer(str, str)
-        return UserSettings(deserializer.deserialize(data))
+        tmp = deserializer.deserialize(data)
+        for key, value in tmp.iteritems():
+            convert = {"false": False, "False": False,
+                       "True": True, "true": True}
+            value = convert.get(value, value)
+            tmp[key] = value
+        return UserSettings(tmp)
 
 
 class Settings(object):

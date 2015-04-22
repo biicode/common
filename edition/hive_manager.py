@@ -1,7 +1,7 @@
 from biicode.common.model.brl.block_name import BlockName
 from biicode.common.edition.hiveprocessor import blocks_process, deps_process
 from biicode.common.edition.processors.processor_changes import ProcessorChanges
-from biicode.common.edition.checkin import checkin_files, checkin_block_files
+from biicode.common.edition.checkin import CheckinManager
 from biicode.common.exception import BiiException, UpToDatePublishException,\
     PublishException
 from biicode.common.publish.publish_manager import block_changed
@@ -116,7 +116,7 @@ class HiveManager(object):
     def closure(self):
         return self.hive_holder.hive_dependencies.closure
 
-    def update(self, block_name=None, time=None):
+    def update(self, settings, block_name=None, time=None):
         """ a block is outdated, because someone has published from another location,
         and parent is not the last one in the block anymore.
         update is able to merge with the given time
@@ -144,7 +144,10 @@ class HiveManager(object):
 
         # Extra "process" after the update
         proc_changes = ProcessorChanges()
-        checkin_block_files(hive_holder, block_name, files, proc_changes, self._biiout)
+
+        checkin_manager = CheckinManager(hive_holder, settings, self._biiout)
+        checkin_manager.checkin_block_files(block_name, files, proc_changes)
+
         blocks_process(hive_holder, proc_changes, self._biiout)
         deps_process(self._biiapi, hive_holder, proc_changes, self._biiout)
         block_holder = hive_holder[block_name]
@@ -156,12 +159,12 @@ class HiveManager(object):
         return block_name
 
     def process(self, settings, files):
-        hive_holder = self.hive_holder
         delete_migration = migrate_bii_config(files, self._biiout)
-        processor_changes = checkin_files(hive_holder, settings, files, self._biiout)
-        blocks_process(hive_holder, processor_changes, self._biiout)
-        deps_process(self._biiapi, hive_holder, processor_changes, self._biiout, settings)
-        self._edition.save_hive_changes(hive_holder.hive, processor_changes)
+        checkin_manager = CheckinManager(self.hive_holder, settings, self._biiout)
+        processor_changes = checkin_manager.checkin_files(files)
+        blocks_process(self.hive_holder, processor_changes, self._biiout)
+        deps_process(self._biiapi, self.hive_holder, processor_changes, self._biiout, settings)
+        self._edition.save_hive_changes(self.hive_holder.hive, processor_changes)
         return delete_migration
 
     def find(self, policy=None, **find_args):

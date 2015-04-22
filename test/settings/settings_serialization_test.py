@@ -23,7 +23,7 @@ defines:
     def test_user_defined_settings(self):
         raw_settings = '''cmake: {generator: Visual}
 os: {arch: 64bit, family: MacOS, version: 10.9.1}
-user: {my_definition: hola, my_other_definition: adios}
+user: {autocrlf: true, my_definition: hola, my_other_definition: adios}
 '''
         settings = Settings.loads(raw_settings)
         self.assertTrue(hasattr(settings, 'user'))

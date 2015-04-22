@@ -36,7 +36,8 @@ def make_content(brl, lang=BiiType(UNKNOWN), read_file=True):
 
 
 def make_too_big_content(brl, lang=BiiType(UNKNOWN)):
-    blob = Blob(path=testfileutils.file_path("limits/largefile.txt"), is_binary=True)
+    text = testfileutils.read("limits/largefile.txt")
+    blob = Blob(text, is_binary=True)
     parser = parser_factory(lang, brl.cell_name)
     return Content(brl, blob, parser)
 
