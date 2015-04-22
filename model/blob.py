@@ -10,23 +10,25 @@ class Blob(object):
     """ Object to hold content bytes, and manage lazy compression
     """
 
-    def __init__(self, blob=None, is_binary=False):
+    def __init__(self, blob=None, is_binary=False, normalize=True):
         '''
         param blob: str object containing bytes, used as byte array or text string
         param is_binary: if True, nothing will be done, normalization to LF otherwise
         '''
+
         self._compressed_bin = None  # The load, but compressed
         self._sys_text = None  # Transient, the load text as system CRLF requires
         self._sha = None  # shas are also lazily computed
         self._is_binary = is_binary
         # The real load of the blob
-        if is_binary:
+        if is_binary or not normalize:
             self._binary = blob
         elif blob is not None:
             assert isinstance(blob, basestring)
             self._binary = blob.replace(b'\r\n', '\n').replace(b'\r', '\n')
         else:
             self._binary = None
+
         self._size = None
         self.serialize_bytes = True
 
@@ -156,5 +158,6 @@ class Blob(object):
             c._size = data.get(Blob.SERIAL_SIZE_KEY)
         except KeyError:
             pass
+
         c._sha = SHA.deserialize(data[Blob.SERIAL_SHA_KEY])
         return c
