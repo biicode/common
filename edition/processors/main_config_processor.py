@@ -5,8 +5,7 @@ class MainConfigProcessor(object):
     """Class to process mains filters
     """
 
-    def do_process(self, block_holder, processor_changes, biiout):
-        assert processor_changes is not None
+    def do_process(self, block_holder, biiout):
         #block_name = block_holder.block_name
         mains = block_holder.mains
 

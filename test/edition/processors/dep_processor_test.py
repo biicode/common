@@ -24,9 +24,8 @@ class DependencyProcessorTest(BiiTestCase):
         main_cell.dependencies.explicit = {BlockCellName(sphereh)}
         main_cell.dependencies.system = {SystemCellName('iostream')}
         main_cell.dependencies.resolved = {CPPDeclaration('sphere.h'), CPPDeclaration('iostream')}
-        changes, _ = process_holder(block_holder, DependenciesProcessor())
+        process_holder(block_holder, DependenciesProcessor())
         # Checks
-        self.assertFalse(changes)
         self.check_dependency_set(main_cell.dependencies, resolved=['sphere.h', 'iostream'],
                                    explicit=[sphereh], system=['iostream'])
 
@@ -42,7 +41,7 @@ class DependencyProcessorTest(BiiTestCase):
         block_holder['develop/sphere.h'].cell.container = BlockCellName(sphereh)
         block_holder['main.cpp'].cell.dependencies.unresolved = {CPPDeclaration(sphereh_test)}
         block_holder['main2.cpp'].cell.dependencies.unresolved = {CPPDeclaration(sphereh_dev)}
-        _, outputstream = process_holder(block_holder, DependenciesProcessor())
+        outputstream = process_holder(block_holder, DependenciesProcessor())
         warn = 'Block dummy/geom has absolute paths, like: #include "dummy/geom/develop/sphere.h"'
         self.assertIn(warn, str(outputstream))
 

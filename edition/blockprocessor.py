@@ -22,7 +22,7 @@ class BlockProcessor(object):
         # This should be the last one to process mains as it can disable entry points
         self.processors.append(MainConfigProcessor())
 
-    def process(self, block_holder, processor_changes, biiout):
+    def process(self, block_holder, biiout):
         for p in self.processors:
             logger.debug('Applying processor  %s' % p.__class__.__name__)
-            p.do_process(block_holder, processor_changes, biiout)
+            p.do_process(block_holder, biiout)

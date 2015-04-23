@@ -10,7 +10,6 @@ from biicode.common.edition.parsing.cpp.drl_parser import DRLCPPParser
 from biicode.common.edition.processors.parse_processor import ParseProcessor
 from biicode.common.edition.block_holder import BlockHolder
 from biicode.common.model.resource import Resource
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from mock import Mock
 from biicode.common.output_stream import OutputStream
 from biicode.common.test.bii_test_case import BiiTestCase
@@ -166,25 +165,23 @@ class CPPImplementationProcessorTest(BiiTestCase):
                                                     parser=DRLCPPParser())))
 
         block_holder = BlockHolder(block_name, resources)
-        changes = self._process(block_holder)
-        return block_holder, changes
+        self._process(block_holder)
+        return block_holder
 
     def _process_from_files(self, names):
         '''param names: iterable of BlockCellNames. The user will be stripped, and the remaining
         will be loaded from the test folder.
         Will create a HiveHolder, fill with the data and process it'''
         block_holder = mother.get_block_holder(names, BiiType(CPP))
-        changes = self._process(block_holder)
-        return block_holder, changes
+        self._process(block_holder)
+        return block_holder
 
     def _process(self, block_holder):
         '''helper method that actually invokes the processor'''
         for r in block_holder.simple_resources:
             r.content.parse()
         processor = CPPImplementationsProcessor()
-        changes = ProcessorChanges()
-        processor.do_process(block_holder, changes, Mock())
-        return changes
+        processor.do_process(block_holder, Mock())
 
     @parameterized.expand([
         ('user/geom/sphere.h', 'user/geom/sphere.cpp'),
@@ -200,9 +197,8 @@ class CPPImplementationProcessorTest(BiiTestCase):
     def test_implementation_from_files(self, header, source):
         '''basic check that header is implemented by source'''
         sources = [header, source]
-        block_holder, changes = self._process_from_files(sources)
+        block_holder = self._process_from_files(sources)
 
-        self.assert_bii_equal(changes, ProcessorChanges())
         header = BlockCellName(header)
         source = BlockCellName(source)
         header_cell = block_holder[header.cell_name].cell
@@ -215,10 +211,9 @@ class CPPImplementationProcessorTest(BiiTestCase):
         for file_ in testfileutils.get_dir_files('csparse'):
             sources.append('user/csparse/' + file_)
 
-        block_holder, changes = self._process_from_files(sources)
+        block_holder = self._process_from_files(sources)
 
         #Checks
-        self.assert_bii_equal(changes, ProcessorChanges())
         header = block_holder['cs.h'].cell
         sources = set(sources)
         sources.remove('user/csparse/cs.h')
@@ -240,9 +235,8 @@ class CPPImplementationProcessorTest(BiiTestCase):
         in snippets of code as strings'''
         sources = {'user/block/header.h': header,
                    'user/block/body.cpp': source}
-        block_holder, changes = self._process_from_contents(sources)
+        block_holder = self._process_from_contents(sources)
 
-        self.assert_bii_equal(changes, ProcessorChanges())
         header = BlockCellName('user/block/header.h')
         source = BlockCellName('user/block/body.cpp')
         header_cell = block_holder['header.h'].cell
@@ -262,12 +256,10 @@ class CPPImplementationProcessorTest(BiiTestCase):
         '''some basic negative tests, from snippets of code'''
         sources = {'user/block/header.h': header,
                    'user/block/body.cpp': source}
-        block_holder, changes = self._process_from_contents(sources)
+        block_holder = self._process_from_contents(sources)
 
-        self.assert_bii_equal(changes, ProcessorChanges())
         header = BlockCellName('user/block/header.h')
         source = BlockCellName('user/block/body.cpp')
-        self.assertEqual({}, changes.upserted)
         header_cell = block_holder[header.cell_name].cell
         self.assertEqual(set(), header_cell.dependencies.implicit)
 
@@ -278,17 +270,15 @@ class CPPImplementationProcessorTest(BiiTestCase):
     def test_has_main(self):
         '''some basic negative tests, from snippets of code'''
         sources = {'user/block/body.cpp': main_body}
-        block_holder, changes = self._process_from_contents(sources)
+        block_holder = self._process_from_contents(sources)
 
-        self.assert_bii_equal(changes, ProcessorChanges())
-        ParseProcessor().do_process(block_holder, changes, OutputStream())
+        ParseProcessor().do_process(block_holder, OutputStream())
 
         self.assertTrue(block_holder._resources['body.cpp'].content.parser.has_main_function())
 
         sources = {'user/block/body.cpp': no_main_body}
-        block_holder, changes = self._process_from_contents(sources)
+        block_holder = self._process_from_contents(sources)
 
-        self.assert_bii_equal(changes, ProcessorChanges())
-        ParseProcessor().do_process(block_holder, changes, OutputStream())
+        ParseProcessor().do_process(block_holder, OutputStream())
 
         self.assertFalse(block_holder._resources['body.cpp'].content.parser.has_main_function())

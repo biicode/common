@@ -5,7 +5,6 @@ from biicode.common.edition.processors.virtual_processor import VirtualConfigura
 from biicode.common.settings.settings import Settings
 from biicode.common.model.bii_type import CPP
 from biicode.common.test import model_creator as mother
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from biicode.common.output_stream import OutputStream
 
 
@@ -14,11 +13,8 @@ class VirtualProcessorGeomTest(unittest.TestCase):
     def test_basic_geom(self):
         block_cell_names = mother.make_folder_resources('dummy', 'virtual')
         self.block_holder = mother.get_block_holder(block_cell_names, CPP)
-        changes = ProcessorChanges()
 
-        VirtualConfigurationProcessor().do_process(self.block_holder, changes,
-                                                   OutputStream())
-        self.assertEqual(0, len(changes.upserted))
+        VirtualConfigurationProcessor().do_process(self.block_holder, OutputStream())
         self.assertEqual(8, len(self.block_holder.cell_names))
 
         self.check_virtual_resource('sphere.cpp')

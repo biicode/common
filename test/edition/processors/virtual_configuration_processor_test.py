@@ -4,7 +4,6 @@ from biicode.common.test.bii_test_case import BiiTestCase
 from biicode.common.model.blob import Blob
 from biicode.common.model.content import Content
 from biicode.common.settings.settings import Settings
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from biicode.common.settings.osinfo import OSInfo
 from biicode.common.edition.block_holder import BlockHolder
 from biicode.common.model.resource import Resource
@@ -44,14 +43,11 @@ class VirtualConfigurationProcessorTest(BiiTestCase):
                                                   Content(None, Blob(myConf1)))}
         self.block_holder = BlockHolder(BlockName('user/block'), resources)
 
-        changes = ProcessorChanges()
-        VirtualConfigurationProcessor().do_process(self.block_holder, changes,
-                                                   OutputStream())
+        VirtualConfigurationProcessor().do_process(self.block_holder, OutputStream())
 
         self._sphere_os_checks('sphere.h')
         self._sphere_os_checks('sphere.cpp')
 
-        self.assertEqual(4, len(changes.upserted))
         self.assertEqual(None, self.block_holder['sphere.h'].content)
         self.assertEqual(None, self.block_holder['sphere.cpp'].content)
 

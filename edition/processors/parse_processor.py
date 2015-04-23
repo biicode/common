@@ -2,7 +2,6 @@
 
 class ParseProcessor(object):
 
-    def do_process(self, block_holder, changes, biiout):
+    def do_process(self, block_holder, biiout):
         for resource in block_holder.simple_resources:
-            if resource.parse(biiout):
-                changes.upsert(resource.name, resource.content)
+            resource.parse(biiout)

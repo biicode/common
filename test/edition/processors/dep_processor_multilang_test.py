@@ -11,7 +11,6 @@ from biicode.common.test.edition.processors.helpers import process_holder
 from nose.plugins.attrib import attr
 from biicode.common.edition.block_holder import BlockHolder
 from biicode.common.model.brl.block_name import BlockName
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 
 
 class DependencyProcessorMultilangTest(BiiTestCase):
@@ -26,9 +25,8 @@ class DependencyProcessorMultilangTest(BiiTestCase):
         block_holder['sphere.cpp'].cell.dependencies.unresolved = {CPPDeclaration('math.h'),
                                                                 CPPDeclaration('iostream'),
                                                                 CPPDeclaration('sphere.h')}
-        changes, _ = process_holder(block_holder, DependenciesProcessor())
+        process_holder(block_holder, DependenciesProcessor())
         # Checks
-        self.assert_bii_equal(changes, ProcessorChanges())
         mainR = block_holder['main.cpp'].cell
         self.check_dependency_set(mainR.dependencies,
                                    resolved=['sphere.h', 'iostream'],
@@ -54,10 +52,9 @@ class DependencyProcessorMultilangTest(BiiTestCase):
         block_holder['sphere.js'].cell.dependencies.unresolved = {NodeDeclaration('http.js'),
                                                              NodeDeclaration('url.js'),
                                                              NodeDeclaration('./spherefun.js')}
-        changes, _ = process_holder(block_holder, DependenciesProcessor())
+        process_holder(block_holder, DependenciesProcessor())
 
         # Checks
-        self.assert_bii_equal(changes, ProcessorChanges())
         mainR = block_holder['main.js'].cell
         self.assertEqual(mainR.dependencies.explicit, {'dummy/geom/sphere.js'})
         self.assertEqual(mainR.dependencies.system, {'http.js'})

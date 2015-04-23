@@ -1,7 +1,6 @@
 '''
 Common helper functions for processors tests
 '''
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from biicode.common.output_stream import OutputStream
 
 
@@ -11,7 +10,6 @@ def process_holder(holder, processor):
         @return changes.result_changes and process response
     """
 
-    changes = ProcessorChanges()
     biiout = OutputStream()
-    processor.do_process(holder, changes, biiout)
-    return changes, biiout
+    processor.do_process(holder, biiout)
+    return biiout

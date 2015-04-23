@@ -32,7 +32,7 @@ def find(biiapi, hive_holder, response, policy, **find_args):
     return find_result
 
 
-def update_hive_with_find_result(hive_holder, find_result, processor_changes):
+def update_hive_with_find_result(hive_holder, find_result):
     logger.debug("Applying find result %s" % find_result)
     blocks = hive_holder.blocks
     renames = find_result.update_renames
@@ -64,14 +64,8 @@ def update_hive_with_find_result(hive_holder, find_result, processor_changes):
                 for r in block_holder.simple_resources:
                     cell = r.cell
                     if cell.dependencies.update_resolved(dep_dict, renames):
-                        modified_content = None
                         for old, new in renames.iteritems():
-                            ch = r.content.update_content_declaration(old, new)
-                        if ch:
-                            modified_content = r.content
-                        processor_changes.upsert(r.name, modified_content)
+                            r.content.update_content_declaration(old, new)
 
     for block_holder in hive_holder.block_holders:
-        resource = block_holder.commit_config()
-        if resource:
-            processor_changes.upsert(resource.name, resource.content, blob_changed=True)
+        block_holder.commit_config()
