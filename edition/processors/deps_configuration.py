@@ -8,8 +8,7 @@ class DependenciesConfigurationProcessor(object):
     Processing of [dependencies] file
     """
 
-    def do_process(self, block_holder, processor_changes, biiout):
-        assert processor_changes is not None
+    def do_process(self, block_holder, biiout):
         # Use information contained in biicode tags:
         deps = block_holder.dependencies
         if not deps:

@@ -15,34 +15,31 @@ class MainsProcessorTest(TestCase):
     def test_config_file_with_main(self):
         main_conf = 'r1.h'
         self.prepare_context(main_conf)
-        changes, _ = process_holder(self.block_holder, self.processor)
+        process_holder(self.block_holder, self.processor)
         # Checks
         self.assertTrue(self.res['user/block/r1.h'].cell.hasMain)
         self.assertFalse(self.res['user/block/r2.cpp'].cell.hasMain)
-        self.assertEqual(0, len(changes.upserted))
 
     def test_config_unknown_file_main(self):
         main_conf = r'''r90.h'''
         self.prepare_context(main_conf)
-        changes, response = process_holder(self.block_holder, self.processor)
+        response = process_holder(self.block_holder, self.processor)
         # Checks
         self.assertIn("user/block mains: there aren't any matches with r90.h filter",
                       str(response))
         self.assertFalse(self.res['user/block/r1.h'].cell.hasMain)
         self.assertFalse(self.res['user/block/r2.cpp'].cell.hasMain)
-        self.assertEqual(0, len(changes.upserted))
 
     def test_config_unknown_file_with_main(self):
         main_conf = r'''r90.h
         r1.h'''
         self.prepare_context(main_conf)
-        changes, response = process_holder(self.block_holder, self.processor)
+        response = process_holder(self.block_holder, self.processor)
         # Checks
         self.assertIn("user/block mains: there aren't any matches with r90.h filter",
                       str(response))
         self.assertTrue(self.res['user/block/r1.h'].cell.hasMain)
         self.assertFalse(self.res['user/block/r2.cpp'].cell.hasMain)
-        self.assertEqual(0, len(changes.upserted))
 
     def test_delete_main(self):
         r1 = SimpleCell('user/block/r1.h', CPP)
@@ -60,12 +57,11 @@ class MainsProcessorTest(TestCase):
         process_holder(block_holder, ParseProcessor())
         self.assertTrue(res['user/block/r3.cpp'].cell.hasMain)
 
-        changes, _ = process_holder(block_holder, MainConfigProcessor())
+        process_holder(block_holder, MainConfigProcessor())
         # Checks
         self.assertFalse(res['user/block/r1.h'].cell.hasMain)
         self.assertFalse(res['user/block/r2.cpp'].cell.hasMain)
         self.assertFalse(res['user/block/r3.cpp'].cell.hasMain)
-        self.assertEqual(0, len(changes.upserted))
 
     def test_mains_with_filter(self):
         r1 = SimpleCell('user/block/r1.h', CPP)

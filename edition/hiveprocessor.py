@@ -1,7 +1,6 @@
 from biicode.common.edition.blockprocessor import BlockProcessor
 from biicode.common.utils.bii_logging import logger
 from biicode.common.edition import changevalidator
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from collections import defaultdict
 from biicode.common.model.symbolic.reference import References
 from biicode.common.exception import BiiException, NotFoundException
@@ -11,34 +10,33 @@ from biicode.common.model.symbolic.block_version_table import BlockVersionTable
 from biicode.common.edition.hive_dependencies import HiveDependencies
 
 
-def blocks_process(hive_holder, processor_changes, biiout):
+def blocks_process(hive_holder, biiout):
     """ This function processes the edition blocks of the hive, nothing related with deps.
     It searches resolved-unresolved between edition blocks.
     param hive_holder: current HiveHolder
     param processor_changes: ProcessorChanges to annotate changes done during process
     param biiout: biiout
     """
-    assert isinstance(processor_changes, ProcessorChanges)
 
     logger.debug("---------- process blocks --------")
 
-    settings = hive_holder.hive.settings
+    settings = hive_holder.settings
     langs = [lang for lang in ['arduino', 'fortran', 'python']
              if getattr(settings, lang, None)]
     block_processor = BlockProcessor(langs)
     for block_holder in hive_holder.block_holders:
         changevalidator.check_block_size(block_holder, biiout)
-        block_processor.process(block_holder, processor_changes, biiout)
+        block_processor.process(block_holder, biiout)
 
 
-def deps_process(biiapi, hive_holder, processor_changes, biiout, settings=None):
+def deps_process(biiapi, hive_holder, biiout, settings=None):
     """Try to find unresolved in the existing external references or in the external references
     of the previous execution, so moving a file from one place to another does not require a
     find
     """
     logger.debug("---------- process deps --------")
     _change_local_versions(hive_holder)  # to edition ones if you opened blocks
-    _discover_tag_versions(hive_holder, biiapi, processor_changes, biiout)
+    _discover_tag_versions(hive_holder, biiapi, biiout)
     common_table = compute_common_table(hive_holder)  # BlockVersionTable
     _update_resolved(biiapi, hive_holder, common_table, biiout)
 
@@ -57,11 +55,7 @@ def deps_process(biiapi, hive_holder, processor_changes, biiout, settings=None):
     _update_requirements(hive_holder, real_graph, overwrites, common_table, biiout)
 
     for block_holder in hive_holder.block_holders:
-        biiconfig = block_holder.commit_config()  # Resource
-        if biiconfig:
-            processor_changes.upsert(biiconfig.name, biiconfig.content, blob_changed=True)
-
-    hive_holder.hive.update(processor_changes)
+        block_holder.commit_config()  # Resource
 
 
 def _change_local_versions(hive_holder):
@@ -77,7 +71,7 @@ def _change_local_versions(hive_holder):
                 block_holder.requirements.add_version(hive_version)
 
 
-def _discover_tag_versions(hive_holder, biiapi, processor_changes, out):
+def _discover_tag_versions(hive_holder, biiapi, out):
     '''
     If a version is specify with a tag instead of a time we must discover corresponding time
     '''
@@ -87,9 +81,7 @@ def _discover_tag_versions(hive_holder, biiapi, processor_changes, out):
                 if version.time is None:  # Discover last matching time for given version
                     full_version = biiapi.get_version_by_tag(version.block, version.tag)
                     block_holder.requirements[name] = full_version
-                    biiconfig = block_holder.commit_config()
-                    processor_changes.upsert(biiconfig.name, biiconfig.content,
-                                             blob_changed=True)
+                    block_holder.commit_config()
                 else:  # Check that time and tag match
                     try:
                         delta = biiapi.get_version_delta_info(version)

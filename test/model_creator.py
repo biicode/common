@@ -11,7 +11,6 @@ import random
 from biicode.common.edition.parsing.factory import parser_factory
 from biicode.common.edition.block_holder import BlockHolder
 from biicode.common.model.id import UserID
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from biicode.common.utils.file_utils import load
 
 
@@ -70,15 +69,11 @@ def get_block_holder(block_cell_names, biitype=BiiType(UNKNOWN)):
     return BlockHolder(block_name, resources)
 
 
-def make_simple_cell(block_cell_name, hive=None):
+def make_simple_cell(block_cell_name):
     if isinstance(block_cell_name, basestring):
         block_cell_name = BlockCellName(block_cell_name)
     cell = SimpleCell(block_cell_name)
     cell.type = BiiType.from_extension(block_cell_name.extension)
-    if hive:
-        changes = ProcessorChanges()
-        changes.upsert(cell.name, cell, None)
-        hive.update(changes)
     return cell
 
 

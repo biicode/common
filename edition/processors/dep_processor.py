@@ -8,12 +8,10 @@ from fnmatch import fnmatch
 class DependenciesProcessor(object):
     ''' Processor class for finding internal dependencies within a hive '''
 
-    def do_process(self, block_holder, processor_changes, biiout):
-        assert block_holder
+    def do_process(self, block_holder, biiout):
         assert biiout is not None
         #TODO: response some information?
         self.block_holder = block_holder
-        self._processor_changes = processor_changes
         self._biiout = biiout
         self._define_datas()
         self._search_system()

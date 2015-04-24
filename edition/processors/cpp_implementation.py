@@ -9,9 +9,8 @@ class CPPImplementationsProcessor(object):
      processor to detect implementations in C++, a very difficult task, so this processor is not
      perfect.
      '''
-    def do_process(self, block_holder, processor_changes, biiout):
+    def do_process(self, block_holder, biiout):
         assert biiout is not None
-        assert processor_changes is not None
         # ALL definitions are stored in a dict for easy checking
         #For functions and vars # {blockName: scope: name: set(BlockCellName)}
 

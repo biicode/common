@@ -1,6 +1,5 @@
 from biicode.common.model.brl.block_name import BlockName
 from biicode.common.edition.hiveprocessor import blocks_process, deps_process
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from biicode.common.edition.checkin import checkin_files, checkin_block_files
 from biicode.common.exception import BiiException, UpToDatePublishException,\
     PublishException
@@ -41,10 +40,12 @@ class HiveManager(object):
                               'Previous DEV publication (if any) will be overwritten')
 
         if not publish_all:
-            return self._publish_one(block_name, tag, msg, versiontag, origin)
+            result = self._publish_one(block_name, tag, msg, versiontag, origin)
         else:
             # Be careful, return array of versions
-            return self._publish_all(tag, msg, versiontag)
+            result = self._publish_all(tag, msg, versiontag)
+        self._edition.save_hive_changes(self.hive_holder)
+        return result
 
     def _get_target_block_name(self, block_name):
         """Check if block_name is a valid block or if block_name is none check
@@ -83,7 +84,7 @@ class HiveManager(object):
         except BiiException as e:
             raise PublishException('Publication failed in server!\n%s' % e.message)
 
-        update_config(version, self._edition, hive_holder)
+        update_config(version, hive_holder)
         self._biiout.info('Successfully published %s\n' % str(version))
         return version
 
@@ -103,14 +104,8 @@ class HiveManager(object):
     @property
     def hive_holder(self):
         if self._hive_holder is None:
-            self._hive_holder = self._edition.get_holder(self.hive)
+            self._hive_holder = self._edition.get_holder()
         return self._hive_holder
-
-    @property
-    def hive(self):
-        if self._hive is None:
-            self._hive = self._edition.read_hive()
-        return self._hive
 
     @property
     def closure(self):
@@ -143,25 +138,27 @@ class HiveManager(object):
         files, other_version = update(block_holder, time, self._biiapi, self._biiout)
 
         # Extra "process" after the update
-        proc_changes = ProcessorChanges()
-        checkin_block_files(hive_holder, block_name, files, proc_changes, self._biiout)
-        blocks_process(hive_holder, proc_changes, self._biiout)
-        deps_process(self._biiapi, hive_holder, proc_changes, self._biiout)
+        checkin_block_files(hive_holder, block_name, files, self._biiout)
+        # TODO: It seems that this is the same pattern as _process_resources from open_close.py
+        #       Factorize accordingly
+        # Extra thing: we have to force them to be saved
+        for (_, content) in hive_holder[block_name].simple_resources:
+            content._blob_updated = True  # FIXME: Do not access private
+        blocks_process(hive_holder, self._biiout)
+        deps_process(self._biiapi, hive_holder, self._biiout)
         block_holder = hive_holder[block_name]
         block_holder.parent = other_version
-        new_config = block_holder.commit_config()
-        if new_config:
-            proc_changes.upsert(new_config.name, new_config.content, True)
-        self._edition.save_hive_changes(hive_holder.hive, proc_changes)
+        block_holder.commit_config()
+        self._edition.save_hive_changes(hive_holder)
         return block_name
 
     def process(self, settings, files):
         hive_holder = self.hive_holder
         delete_migration = migrate_bii_config(files, self._biiout)
-        processor_changes = checkin_files(hive_holder, settings, files, self._biiout)
-        blocks_process(hive_holder, processor_changes, self._biiout)
-        deps_process(self._biiapi, hive_holder, processor_changes, self._biiout, settings)
-        self._edition.save_hive_changes(hive_holder.hive, processor_changes)
+        checkin_files(hive_holder, settings, files, self._biiout)
+        blocks_process(hive_holder, self._biiout)
+        deps_process(self._biiapi, hive_holder, self._biiout, settings)
+        self._edition.save_hive_changes(hive_holder)
         return delete_migration
 
     def find(self, policy=None, **find_args):
@@ -180,11 +177,10 @@ class HiveManager(object):
 
         if find_result:
             hive_holder = self.hive_holder
-            processor_changes = ProcessorChanges()
-            find_manager.update_hive_with_find_result(hive_holder, find_result, processor_changes)
-            blocks_process(hive_holder, processor_changes, self._biiout)
-            deps_process(self._biiapi, hive_holder, processor_changes, self._biiout)
-            self._edition.save_hive_changes(hive_holder.hive, processor_changes)
+            find_manager.update_hive_with_find_result(hive_holder, find_result)
+            blocks_process(hive_holder, self._biiout)
+            deps_process(self._biiapi, hive_holder, self._biiout)
+            self._edition.save_hive_changes(hive_holder)
 
     def open(self, block_name, track, time, version_tag):
         '''
@@ -199,12 +195,12 @@ class HiveManager(object):
         hive_holder = self.hive_holder
         block_version = select_version(hive_holder, self._biiapi, self._biiout, block_name,
                                        track, time, version_tag)
-        processor_changes = open_block(hive_holder, block_version, self._biiapi, self._biiout)
+        open_block(hive_holder, block_version, self._biiapi, self._biiout)
         try:
-            blocks_process(hive_holder, processor_changes, self._biiout)
-            deps_process(self._biiapi, hive_holder, processor_changes, self._biiout)
+            blocks_process(hive_holder, self._biiout)
+            deps_process(self._biiapi, hive_holder, self._biiout)
         finally:
-            self._edition.save_hive_changes(hive_holder.hive, processor_changes)
+            self._edition.save_hive_changes(hive_holder)
         return block_version
 
     def close(self, block_name, settings=None, force=False):
@@ -229,7 +225,7 @@ class HiveManager(object):
                                "Execute with --force to ignore them or publish it first."
                                % (str(block_name), str(changes)))
 
-        processor_changes = close_block(self.hive_holder, block_name)
-        blocks_process(self.hive_holder, processor_changes, self._biiout)
-        deps_process(self._biiapi, self.hive_holder, processor_changes, self._biiout, settings)
-        self._edition.save_hive_changes(self.hive_holder.hive, processor_changes)
+        close_block(self.hive_holder, block_name)
+        blocks_process(self.hive_holder, self._biiout)
+        deps_process(self._biiapi, self.hive_holder, self._biiout, settings)
+        self._edition.save_hive_changes(self.hive_holder)

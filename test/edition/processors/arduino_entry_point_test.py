@@ -1,6 +1,5 @@
 from biicode.common.model.cells import SimpleCell
 from biicode.common.model.bii_type import CPP
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from biicode.common.edition.processors.arduino_entry_points import ArduinoEntryPointProcesor
 from biicode.common.model.blob import Blob
 from biicode.common.model.content import Content
@@ -79,10 +78,11 @@ class ArduinoEntryPointTest(BiiTestCase):
         block_holder = BlockHolder(BlockName('user/block'), resources)
         for r in resources.itervalues():
             r.content.parse()
+            r.content.updated = False
         processor = ArduinoEntryPointProcesor()
-        changes = ProcessorChanges()
-        processor.do_process(block_holder, changes, Mock())
-
-        self.assert_bii_equal(changes, ProcessorChanges())
+        processor.do_process(block_holder, Mock())
         mainblink = block_holder['mainblink.cpp'].cell
+        content = block_holder['mainblink.cpp'].content
         self.assertTrue(mainblink.hasMain)
+        self.assertFalse(content.updated)
+        self.assertFalse(content.blob_updated)

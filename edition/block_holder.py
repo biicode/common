@@ -107,7 +107,8 @@ class BlockHolder(object):
         new_content = self.config.dumps()
         if new_content:
             name = self.block_name + BIICODE_FILE
-            new_res = Resource(SimpleCell(name, TEXT), Content(name, load=Blob(new_content)))
+            new_res = Resource(SimpleCell(name, TEXT),
+                               Content(name, load=Blob(new_content), created=True))
             self.add_resource(new_res)
             return new_res
         return None
