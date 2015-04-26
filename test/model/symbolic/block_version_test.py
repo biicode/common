@@ -101,6 +101,16 @@ class BlockVersionTest(unittest.TestCase):
         v1 = BlockVersion("dummy/dummy/first/master", None, "1.12")
         self.assertEquals(v1, BlockVersion.loads('dummy/first @1.12'))
 
+        v1 = BlockVersion.loads("user/math: @DEV ")
+        self.assertEqual(v1.block, "user/user/math/master")
+        self.assertEqual(v1.time, None)
+        self.assertEqual(v1.tag, "DEV")
+
+        v1 = BlockVersion.loads("user/math: 1 @1.2   # My comment")
+        self.assertEqual(v1.block, "user/user/math/master")
+        self.assertEqual(v1.time, 1)
+        #FIXME: This will fail self.assertEqual(v1.tag, "DEV")
+
     def test_serialize(self):
         bv = BlockVersion("user/user/math/master", 3, '2.7.1')
         s = bv.serialize()

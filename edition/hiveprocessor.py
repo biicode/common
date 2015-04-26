@@ -78,18 +78,18 @@ def _discover_tag_versions(hive_holder, biiapi, out):
     for block_holder in hive_holder.block_holders:
         for name, version in block_holder.requirements.iteritems():
             if version.tag is not None:
-                if version.time is None:  # Discover last matching time for given version
-                    full_version = biiapi.get_version_by_tag(version.block, version.tag)
-                    block_holder.requirements[name] = full_version
-                    block_holder.commit_config()
-                else:  # Check that time and tag match
-                    try:
+                try:
+                    if version.time is None:  # Discover last matching time for given version
+                        full_version = biiapi.get_version_by_tag(version.block, version.tag)
+                        block_holder.requirements[name] = full_version
+                        block_holder.commit_config()
+                    else:  # Check that time and tag match
                         delta = biiapi.get_version_delta_info(version)
                         if delta.versiontag != version.tag:
                             out.error('Tag and version do not match in %s. '
-                                      'Tag will be ignored' % version.to_pretty())
-                    except NotFoundException as e:
-                        out.error(str(e))
+                                  'Tag will be ignored' % version.to_pretty())
+                except NotFoundException as e:
+                    out.error("%s/biicode.conf: %s" % (block_holder.block_name, str(e)))
 
 
 def compute_common_table(hive_holder):
