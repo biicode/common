@@ -18,4 +18,8 @@ class HiveDependencies(object):
 
     @property
     def bii_config(self):
+        ''' Return a dict of biicode.conf objects, e.g.:
+                {user/superblock: <bii_config_object>,
+                user_2/otherblock: <bii_config_object>}
+        '''
         return self.closure.bii_config()
