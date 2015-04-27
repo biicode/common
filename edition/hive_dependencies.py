@@ -15,3 +15,7 @@ class HiveDependencies(object):
     @property
     def version_graph(self):
         return self.src_graph + self.dep_graph
+
+    @property
+    def bii_config(self):
+        return self.closure.bii_config()
