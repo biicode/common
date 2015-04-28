@@ -9,7 +9,7 @@ from biicode.common.exception import ConfigurationFileError, BiiException
 import re
 
 
-IMPLICIT_DEPENDENCIES = re.compile("readme*|CMakeLists.txt|license*|bii_deps_config.cmake")
+IMPLICIT_DEPENDENCIES = re.compile("readme*|CMakeLists.txt|license*|bii_deps_config.cmake|biicode.conf")
 
 
 def build_closure(biiapi, references, base_table, settings=None, biiout=None):

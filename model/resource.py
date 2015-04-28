@@ -38,16 +38,12 @@ class Resource(collections.namedtuple('Resource', ['cell', 'content'])):
             if self.content.parser is None:
                 self.content.parser = parser_factory(self.cell.type, self.cell.name.cell_name)
             if self.content.parser:
-                parsed = self.content.parse()
+                self.content.parse()
                 self.cell.hasMain = self.content.parser.has_main_function()
                 self.cell.dependencies.update_declarations(self.content.parser.explicit_declarations)
-                return parsed
-            else:
-                return False
         except Exception as e:
             logger.error(str(e))
             biiresponse.error("Error parsing %s file" % self.cell.name)
-        return False
 
     def similarity(self, other):
         if self.content is not None and other.content is not None:

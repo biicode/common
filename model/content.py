@@ -13,14 +13,14 @@ def content_diff(base, other, baseName='base', otherName='other'):
     if base:
         if base.load.is_binary:
             return 'Unable to diff binary contents of %s' % baseName
-        textBase = base.load.text
+        textBase = base.load.bytes
     else:
         textBase = ""
 
     if other:
         if other.load.is_binary:
             return 'Unable to diff binary contents of %s' % baseName
-        textOther = other.load.text
+        textOther = other.load.bytes
     else:
         textOther = ""
     if textBase == textOther:
@@ -36,11 +36,30 @@ class Content(object):
     SERIAL_PARSER_KEY = "p"
     SERIAL_IS_PARSED_KEY = "i"
 
-    def __init__(self, id_, load, parser=None, is_parsed=False):
+    def __init__(self, id_, load, parser=None, is_parsed=False, created=False):
         self.ID = id_
         self._load = load
-        self.parser = parser
+        self._parser = parser
         self._is_parsed = is_parsed
+        self._meta_updated = True
+        self._blob_updated = created
+
+    @property
+    def meta_updated(self):
+        return self._meta_updated
+
+    @property
+    def blob_updated(self):
+        return self._blob_updated
+
+    @property
+    def parser(self):
+        return self._parser
+
+    @parser.setter
+    def parser(self, p):
+        self._parser = p
+        self._is_parsed = False
 
     @property
     def load(self):
@@ -50,10 +69,10 @@ class Content(object):
     def sha(self):
         return self._load.sha
 
-    @load.setter
-    def load(self, load):
-        self._load = load
-        self._is_parsed = False
+    def set_blob(self, blob):
+        """ setter bypassing invalidation of parser
+        """
+        self._load = blob
 
     def similarity(self, other):
         # published resource
@@ -83,28 +102,27 @@ class Content(object):
         ret = Serializer().build(
               (Content.SERIAL_ID_KEY, self.ID),
               (Content.SERIAL_LOAD_KEY, self._load),
-              (Content.SERIAL_PARSER_KEY, self.parser),
+              (Content.SERIAL_PARSER_KEY, self._parser),
               (Content.SERIAL_IS_PARSED_KEY, self._is_parsed),
         )
         return ret
 
     def parse(self):
-        if self.parser and not self._is_parsed:
-            self.parser.parse(self._load.text)
-            self._is_parsed = True
-            return True
-        return False
+        if self._parser and not self._is_parsed:
+            self._parser.parse(self._load.bytes)
+            self._parser_updated = True
+        self._is_parsed = True
 
     def update_content_declaration(self, decl, new_decl):
         # Now it is only used for version upgrades that involve a rename
         assert isinstance(decl, Declaration)
         assert isinstance(new_decl, Declaration)
-        #if self.parser and new_decl:
-        new_text = self.parser.updateDeclaration(self._load.text, decl, new_decl)
+        #if self._parser and new_decl:
+        new_text = self._parser.updateDeclaration(self._load.bytes, decl, new_decl)
         if new_text:
-            self._load.text = new_text
-            return True
-        return False
+            self._load = Blob(new_text)
+            self._blob_updated = True
+            self._parser_updated = True
 
 
 class ContentDeserializer(object):
@@ -119,10 +137,12 @@ class ContentDeserializer(object):
         if data is None:
             return None
         try:
-            return Content(id_=self.id_type.deserialize(data[Content.SERIAL_ID_KEY]),
+            content = Content(id_=self.id_type.deserialize(data[Content.SERIAL_ID_KEY]),
                            load=Blob.deserialize(data[Content.SERIAL_LOAD_KEY]),
                            parser=Parser.deserialize(data[Content.SERIAL_PARSER_KEY]),
                            is_parsed=data[Content.SERIAL_IS_PARSED_KEY],
                            )
+            content._meta_updated = False
+            return content
         except Exception as e:
             raise BiiSerializationException('Could not deserialize Content: %s' % str(e))

@@ -4,37 +4,27 @@ from biicode.common.edition import changevalidator
 from biicode.common.diffmerge.compare import compare
 from biicode.common.model.symbolic.block_version import BlockVersion
 from biicode.common.publish.publish_request import PublishRequest
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
 from biicode.common.edition.block_holder import BIICODE_FILE
 
 
-def update_config(new_parent_version, editionapi, hive_holder):
+def update_config(new_parent_version, hive_holder):
     """ after a publication, the parent version has to be updated
     """
     assert isinstance(new_parent_version, BlockVersion)
     assert new_parent_version.time is not None
     assert new_parent_version.time != -1
 
-    hive = hive_holder.hive
     block_name = new_parent_version.block_name
     block_holder = hive_holder[block_name]
     block_holder.parent = new_parent_version
 
-    def commit_conf(block_holder):
-        new_resource = block_holder.commit_config()
-        if new_resource:
-            processor_changes = ProcessorChanges()
-            processor_changes.upsert(new_resource.name, new_resource.content, blob_changed=True)
-            hive.update(processor_changes)
-            editionapi.save_hive_changes(hive, processor_changes)
-
-    commit_conf(block_holder)
+    block_holder.commit_config()
 
     for block_holder in hive_holder.block_holders:
         requirements = block_holder.requirements
         if block_name in requirements:
             requirements.add_version(new_parent_version)
-        commit_conf(block_holder)
+        block_holder.commit_config()
 
 
 def block_changed(changes, block_holder, other_holder):
@@ -98,7 +88,7 @@ def _check_input(hive_holder, block_name):
     if block_name not in hive_holder.blocks:
         raise PublishException('Block "%s" does not exist in your project' % block_name)
 
-    hive_dependencies = hive_holder.hive.hive_dependencies
+    hive_dependencies = hive_holder.hive_dependencies
     gr = hive_dependencies.version_graph
     cycles = gr.get_cycles()
     if cycles:

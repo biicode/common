@@ -24,4 +24,4 @@ class GeomCPPParserTest(unittest.TestCase):
     def test_parse(self, header_file):
         BlobH = Blob(testfileutils.read(header_file))
         parserH = DRLCPPParser()
-        parserH.parse(BlobH.text)
+        parserH.parse(BlobH.bytes)

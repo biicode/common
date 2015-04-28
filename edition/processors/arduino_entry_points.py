@@ -6,9 +6,8 @@ class ArduinoEntryPointProcesor(object):
     '''
      Processor to detect arduino entry points
      '''
-    def do_process(self, block_holder, processor_changes, biiout):
+    def do_process(self, block_holder, biiout):
         assert biiout is not None
-        assert processor_changes is not None
 
         for cell, content in block_holder.simple_resources:
             if cell.type == CPP:

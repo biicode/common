@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from os import linesep
 import zlib
 from biicode.common.exception import BiiException
@@ -8,167 +6,94 @@ from biicode.common.utils.serializer import Serializer
 from biicode.common.model.sha import SHABuilder, SHA
 
 
-def compress(bufferArray):
-    try:
-        return zlib.compress(bufferArray)
-    except IOError:
-        raise BiiException("Error compressing load text string")
-
-
-def uncompress(bufferArray):
-    try:
-        return zlib.decompress(bufferArray)
-    except IOError:
-        raise BiiException("Error compressing load text string")
-
-
-def systemize_text(text):
-    '''given a supposedly normalized text with only \n, create a OS specific version
-    with the convenient linesep'''
-    if linesep != '\n':
-        text = text.replace(b'\n', linesep)
-    return text
-
-
-def normalize_text(text):
-    '''given any text, tries to compute a normalized version containing only  \n. Might fail
-    in some cases with \r, but this way should not be used to read user files, only for generated
-    strings in biicode. For user files use the Blob(path=XXX) parameter, that uses 'rU' open
-    mode'''
-
-    # This in memory replace seems only to be 10% slower that directly reading from file with rU
-    text = text.replace(b'\r\n', '\n')
-    # FIXME: It is possible that \r\r\n exist in file
-    text = text.replace(b'\r', '\n')
-    #if not text.endswith('\n'):
-    #    text = text + "\n"
-    return text
-
-
 class Blob(object):
-    """IMPORTANT: This class overwrites serialization, so if you add extra field,
-        REMEMBER TO PUT in read/write functions
+    """ Object to hold content bytes, and manage lazy compression
     """
 
-    SERIAL_SHA_KEY = "s"
-    SERIAL_IS_BINARY_KEY = "b"
-    SERIAL_COMPRESSED_BIN_KEY = "c"
-    SERIAL_SIZE_KEY = "sz"
-
-    def __init__(self, blob=None, is_binary=False, path=None):
-        ''' public constructor with a string as parameter, there is no-guarantee that the input is
-         really Sys-compliant, so better normalize it, so call setText(), no setNormalizedText()!!!
+    def __init__(self, blob=None, is_binary=False):
         '''
-        self._binary = None  # The real load of the blob
+        param blob: str object containing bytes, used as byte array or text string
+        param is_binary: if True, nothing will be done, normalization to LF otherwise
+        '''
         self._compressed_bin = None  # The load, but compressed
         self._sys_text = None  # Transient, the load text as system CRLF requires
         self._sha = None  # shas are also lazily computed
         self._is_binary = is_binary
-        if blob is not None:
-            assert path is None
+        # The real load of the blob
+        if is_binary:
+            self._binary = blob
+        elif blob is not None:
             assert isinstance(blob, basestring)
-            if is_binary:
-                self._binary = blob
-            else:
-                self._binary = normalize_text(blob)
-        if path is not None:
-            assert blob is None
-            if is_binary:
-                with open(path, 'rb') as handle:
-                    content = handle.read()
-            else:
-                with open(path, 'rU') as handle:
-                    content = handle.read()
-                    #At the moment we leave this end of file with \n here, cause some tests are
-                    #broken otherwise
-                    #if not content.endswith('\n'):
-                    #    content = '%s\n' % content
-                #This was in file_walker read blob, not sure why it was necessary
-                #if content != load.load:
-                    #TODO: Print warning to user, re-writing his file to be normalized
-                    #file_utils.save(file_, load.load)
-            self._binary = content
+            self._binary = blob.replace(b'\r\n', '\n').replace(b'\r', '\n')
+        else:
+            self._binary = None
         self._size = None
+        self.serialize_bytes = True
 
-    def __repr__(self):
-        if self._is_binary:
-            return "BinaryContent"
-        return self.binary
-
-    #TODO: test
     def similarity(self, other):
+        """ compares similarity for text blobs
+        returns: if binary content return 1 if equal 0 otherwise
+                 if text content return 0.0-1.0 of % of equal lines
+        """
         if self.sha == other.sha:
             return 1.0
         if self._is_binary:
-            if self.binary == other.binary:
+            if self.bytes == other.bytes:
                 return 1.0
             else:
                 return 0.0
-        return similarity(self.binary, other.binary)
+        return similarity(self.bytes, other.bytes)
 
     @property
     def is_binary(self):
         return self._is_binary
 
     @property
-    def binary(self):
+    def bytes(self):
+        """ obtain byte load, with lazy decompression from zipped array if necessary
+        """
         if self._binary is None:
-            self._binary = uncompress(self._compressed_bin)
+            try:
+                self._binary = zlib.decompress(self._compressed_bin)
+            except IOError:
+                raise BiiException("Error compressing load text string")
         return self._binary
-
-    @binary.setter
-    def binary(self, binary):
-        self._is_binary = True
-        self._binary = binary
-        self._compressed_bin = None
-        self._sys_text = None
-        self._sha = None
 
     @property
     def text(self):
-        return self.binary
-
-    @text.setter
-    def text(self, text):
-        self._is_binary = False
-        self._binary = normalize_text(text)
-        self._compressed_bin = None
-        self._sys_text = None
-        self._sha = None
+        """ temporary method, to avoid fixing 100s of tests
+        """
+        # TODO: delete method and update tests
+        return self.bytes
 
     @property
     def load(self):
-        if self._is_binary:
-            return self.binary
-        return self._system_text()
-
-    @property
-    def size(self):
-        """size in bytes of content"""
-        return len(self.binary)
-
-    @property
-    def unicode_load(self):
-        return unicode(self.load, errors="ignore")
-
-    def _system_text(self):
-        """ performs a replacement if necessary of LF to the CRLF
-            @return a string with the CRLF combination specific for the current OS
+        """ get the actual content that must be saved in disk
         """
+        if self._is_binary:
+            return self.bytes
+        #performs a replacement if necessary of LF to the CRLF
+        #    @return a string with the CRLF combination specific for the current OS
         if self._sys_text is None:
-            self._sys_text = systemize_text(self.text)
+            if linesep != '\n':
+                self._sys_text = self.bytes.replace(b'\n', linesep)
+            else:
+                self._sys_text = self.bytes
         return self._sys_text
 
     @property
-    def sha(self):
-        if self._sha is None:
-            self._sha = SHABuilder(self.binary).sha()
-        return self._sha
+    def unicode_load(self):
+        """ get the actual content to be shown in web
+        """
+        return unicode(self.load, errors="ignore")
 
-    def _compressed(self):
-        if self._compressed_bin is None:
-            self._compressed_bin = compress(self._binary)
-        return self._compressed_bin
+    @property
+    def sha(self):
+        """ get the sha of this blob, compute lazily if necessary
+        """
+        if self._sha is None:
+            self._sha = SHABuilder(self.bytes).sha()
+        return self._sha
 
     def __hash__(self):
         return hash(self.sha)
@@ -181,32 +106,55 @@ class Blob(object):
         return False
 
     def __ne__(self, other):
-        return not self == other
-
-    def replace(self, origin, newString):
-        t = self.text.replace(origin, newString)
-        self.text = t
-        # Just in case the replace introduced bad CRLF
+        return not self.__eq__(other)
 
     def __len__(self):
-        return len(self.binary)
+        return len(self.bytes)
+
+    @property
+    def size(self):
+        """size in bytes of content"""
+        return len(self.bytes)
+
+    def __repr__(self):
+        if self._is_binary:
+            return "BinaryContent"
+        return self.bytes
+
+    SERIAL_SHA_KEY = "s"
+    SERIAL_IS_BINARY_KEY = "b"
+    SERIAL_COMPRESSED_BIN_KEY = "c"
+    SERIAL_SIZE_KEY = "sz"
 
     def serialize(self):
-        from bson import Binary  # by pymongo
-        bson = Binary(self._compressed())
-        return Serializer().build(
-                    (Blob.SERIAL_SHA_KEY, self.sha),
-                    (Blob.SERIAL_IS_BINARY_KEY, self._is_binary),
-                    (Blob.SERIAL_SIZE_KEY, self.size),
-                    (Blob.SERIAL_COMPRESSED_BIN_KEY, bson)
-        )
+        if self.serialize_bytes:
+            from bson import Binary  # by pymongo
+            if self._compressed_bin is None:
+                try:
+                    self._compressed_bin = zlib.compress(self._binary)
+                except IOError:
+                    raise BiiException("Error compressing load text string")
+            bson = Binary(self._compressed_bin)
+            return Serializer().build(
+                        (Blob.SERIAL_SHA_KEY, self.sha),
+                        (Blob.SERIAL_IS_BINARY_KEY, self._is_binary),
+                        (Blob.SERIAL_SIZE_KEY, self.size),
+                        (Blob.SERIAL_COMPRESSED_BIN_KEY, bson)
+            )
+        else:
+            return Serializer().build(
+                        (Blob.SERIAL_SHA_KEY, self.sha),
+                        (Blob.SERIAL_IS_BINARY_KEY, self._is_binary)
+            )
 
     @staticmethod
     def deserialize(data):
         is_binary = data[Blob.SERIAL_IS_BINARY_KEY]
         c = Blob(is_binary=is_binary)
-        c._compressed_bin = data[Blob.SERIAL_COMPRESSED_BIN_KEY]
-        c._size = data.get(Blob.SERIAL_SIZE_KEY)
-        #c.is_binary = data[Blob.SERIAL_IS_BINARY_KEY]
+        try:
+            c._compressed_bin = data[Blob.SERIAL_COMPRESSED_BIN_KEY]
+            c._size = data.get(Blob.SERIAL_SIZE_KEY)
+        except KeyError:
+            pass
         c._sha = SHA.deserialize(data[Blob.SERIAL_SHA_KEY])
         return c

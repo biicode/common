@@ -20,7 +20,7 @@ class PublishRequest(object):
     def __init__(self, parent=None):
         self.parent = parent  # BlockVersion, the one to compute the changes
         self.parent_time = None  # DateTime of the parent publication, obtained from Delta
-        #self._changes = None  # Transient Changes object
+        # self._changes = None  # Transient Changes object
         self.msg = ""
         self.tag = DEV
         self.versiontag = None
@@ -32,6 +32,15 @@ class PublishRequest(object):
         self.contents_ids = {}  # {CellName: ContentID}
         self.renames = Renames()
         self.origin = None
+        self._bytes = None
+
+    @property
+    def bytes(self):
+        if not self._bytes:
+            self._bytes = sum([content.load.size
+                               for content in self.contents.itervalues() if content])
+
+        return self._bytes
 
     @property
     def block_name(self):
@@ -48,7 +57,7 @@ class PublishRequest(object):
         self.deleted = []
         self.contents = {}
         self.contents_ids = {}
-        #self._changes = changes
+        # self._changes = changes
         self._add_created_and_modified(changes)
         self._add_deleted(changes)
         self.renames = changes.renames
@@ -129,6 +138,9 @@ class PublishRequest(object):
         return pp
 
     def serialize(self):
+        for c in self.contents.itervalues():
+            if c is not None:
+                c.load.serialize_bytes = True
         ret = Serializer().build(
                  (PublishRequest.SERIAL_TRACKED_KEY, self.parent),
                  (PublishRequest.SERIAL_PARENT_DATETIME, self.parent_time),

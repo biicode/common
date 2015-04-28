@@ -9,8 +9,9 @@ from biicode.common.model.symbolic.block_version import BlockVersion
 
 class HiveHolder(object):
 
-    def __init__(self, hive, dict_cells, dict_contents):
-        self.hive = hive
+    def __init__(self, dict_cells, dict_contents):
+        self.hive_dependencies = None  # MUST BE ALWAYS BE ASSIGNED before usage
+        self.settings = None
         resource_dict = defaultdict(list)
         for block_cell_name, cell in dict_cells.iteritems():
             content = dict_contents.get(block_cell_name)

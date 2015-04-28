@@ -12,19 +12,17 @@ from biicode.common.model.resource import Resource
 class VirtualConfigurationProcessor(object):
     virtual_file = 'bii/virtual.bii'
 
-    def do_process(self, block_holder, processor_changes, biiout):
+    def do_process(self, block_holder, biiout):
         assert biiout is not None
-        assert processor_changes is not None
 
         self.block_holder = block_holder
-        self.processor_changes = processor_changes
         block_name = block_holder.block_name
         try:
             virtuals = set()
             realizations = set()
             try:
                 virtual_bii = block_holder[self.virtual_file]
-                virtual = virtualparser.parseFile(virtual_bii.content.load.text)
+                virtual = virtualparser.parseFile(virtual_bii.content.load.bytes)
                 self._process_virtual_config(block_name, virtual, virtuals, realizations, biiout)
             except KeyError:
                 logger.debug('No virtual config in %s' % block_name)
@@ -95,8 +93,7 @@ class VirtualConfigurationProcessor(object):
                 biiout.info('%s virtual realization not existing, creating it' % leave)
                 cell = SimpleCell(leave)
                 cell.type = virtual_cell.type
-                content = Content(leave, Blob(""))
+                content = Content(leave, Blob(""), created=True)
                 content.parser = parser_factory(cell.type, cell.name.cell_name)
                 self.block_holder.add_resource(Resource(cell, content))
-                self.processor_changes.upsert(cell.name, content, blob_changed=True)
             cell.container = block_cell_name

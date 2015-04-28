@@ -11,7 +11,7 @@ import random
 from biicode.common.edition.parsing.factory import parser_factory
 from biicode.common.edition.block_holder import BlockHolder
 from biicode.common.model.id import UserID
-from biicode.common.edition.processors.processor_changes import ProcessorChanges
+from biicode.common.utils.file_utils import load
 
 
 def make_content(brl, lang=BiiType(UNKNOWN), read_file=True):
@@ -26,14 +26,17 @@ def make_content(brl, lang=BiiType(UNKNOWN), read_file=True):
         name = '/'.join(brl.split('/')[1:])
         parser = parser_factory(lang, brl.split('/')[-1])
     if read_file:
-        blob = Blob(path=testfileutils.file_path(name), is_binary=binary)
+        path = testfileutils.file_path(name)
+        content = load(path)
+        blob = Blob(content, is_binary=binary)
     else:
         blob = Blob("Blob example content", is_binary=binary)
     return Content(brl, blob, parser)
 
 
 def make_too_big_content(brl, lang=BiiType(UNKNOWN)):
-    blob = Blob(path=testfileutils.file_path("limits/largefile.txt"), is_binary=True)
+    blob_load = load(testfileutils.file_path("limits/largefile.txt"))
+    blob = Blob(blob_load, is_binary=True)
     parser = parser_factory(lang, brl.cell_name)
     return Content(brl, blob, parser)
 
@@ -67,15 +70,11 @@ def get_block_holder(block_cell_names, biitype=BiiType(UNKNOWN)):
     return BlockHolder(block_name, resources)
 
 
-def make_simple_cell(block_cell_name, hive=None):
+def make_simple_cell(block_cell_name):
     if isinstance(block_cell_name, basestring):
         block_cell_name = BlockCellName(block_cell_name)
     cell = SimpleCell(block_cell_name)
     cell.type = BiiType.from_extension(block_cell_name.extension)
-    if hive:
-        changes = ProcessorChanges()
-        changes.upsert(cell.name, cell, None)
-        hive.update(changes)
     return cell
 
 
