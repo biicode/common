@@ -53,7 +53,7 @@ def migrate_block_holder(block_holder, biiout):
         block_holder.delete_resource(deleted)
     name = block_name + BIICODE_FILE
     new_res = Resource(SimpleCell(name, TEXT), Content(name, load=Blob(config_text),
-                                                       is_modified=True))
+                                                       created=True))
     block_holder.add_resource(new_res)
 
 
