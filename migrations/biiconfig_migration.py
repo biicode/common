@@ -52,12 +52,8 @@ def migrate_block_holder(block_holder, biiout):
     for deleted in block_deleted:
         block_holder.delete_resource(deleted)
     name = block_name + BIICODE_FILE
-<<<<<<< HEAD
-    new_res = Resource(SimpleCell(name, TEXT), Content(name, load=Blob(config_text), created=True))
-=======
     new_res = Resource(SimpleCell(name, TEXT), Content(name, load=Blob(config_text),
                                                        created=True))
->>>>>>> radical/develop
     block_holder.add_resource(new_res)
 
 
@@ -71,7 +67,8 @@ def migrate_block_files(block_name, block_files, biiout):
     old_names = OrderedDict([(k, k) for k in old_names])
     old_names['parents'] = 'parent'
 
-    old_files = [name for name in old_names if 'bii/%s.bii' % name in block_files]
+    old_files = [name for name in old_names if 'bii/%s.bii' %
+                 name in block_files]
     if not old_files:
         return
 
@@ -79,10 +76,11 @@ def migrate_block_files(block_name, block_files, biiout):
 
     if BIICODE_FILE in block_files:
         biiout.warn("The following old configuration files exist in your %s block\n"
-                     "%s\nMigrating them to your existing %s file, please check it"
-                     % (block_name, ', '.join(old_files), BIICODE_FILE))
+                    "%s\nMigrating them to your existing %s file, please check it"
+                    % (block_name, ', '.join(old_files), BIICODE_FILE))
 
-    current_config = ["# Biicode configuration file migrated from old config files\n"]
+    current_config = [
+        "# Biicode configuration file migrated from old config files\n"]
     for file_name, config_name in old_names.iteritems():
         current_config.append("[%s]" % config_name)
         if file_name in old_files:
