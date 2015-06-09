@@ -247,6 +247,8 @@ def _update_requirements(hive_holder, real_graph, overwrites, common_table, resp
             #inform about deleted references
             for block_name, version in dep_table.iteritems():
                 if block_name not in new_table:
-                    response.warn('Removing unused reference to "%s" from %s "requirements"'
+                    response.warn('Unused reference to "%s" from %s [requirements]'
                                   % (str(version), block_holder.block_name))
+                    if version.time is not None:
+                        new_table.add_version(version)
             block_holder.requirements = new_table
