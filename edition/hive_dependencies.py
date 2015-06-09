@@ -23,3 +23,10 @@ class HiveDependencies(object):
                 user_2/otherblock: <bii_config_object>}
         '''
         return self.closure.bii_config()
+
+    @property
+    def block_name_deps(self):
+        ''' Return a list of block_name's
+        '''
+        dependencies = self.dep_graph.nodes
+        return [x.block_name for x in dependencies]
