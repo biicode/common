@@ -2,7 +2,7 @@ from biicode.common.deps.block_version_graph import BlockVersionGraph
 from biicode.common.deps.closure import Closure
 
 
-class HiveDependencies(object):
+class ProjectDependencies(object):
     """ This is a caching object for storing the block and version level dependencies of the
     current graph, as well as the closure
     """

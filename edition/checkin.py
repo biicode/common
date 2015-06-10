@@ -12,7 +12,7 @@ from biicode.common.model.brl.block_name import BlockName
 def checkin_block_files(hive_holder, block_name, files, biiout):
     '''
     Params:
-        hive_holder: HiveHolder
+        hive_holder: ProjectHolder
         block_name: BlockName
         files: {cell_name: content}
         processor_changes: ProcessorChanges
@@ -53,7 +53,7 @@ def checkin_block_files(hive_holder, block_name, files, biiout):
 def checkin_files(hive_holder, settings, files, biiout):
     '''
     Params:
-        hive_holder: HiveHolder
+        hive_holder: ProjectHolder
         files: dict{BlockCellName: Item (str or bytes loaded from file)}
         biiout: biiout
     Returns: ProcessorChanges

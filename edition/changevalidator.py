@@ -27,7 +27,7 @@ def remove_large_cells(files, biiout):
 def check_block_size(block_holder, biiout):
     """Check num of files and the block size reading size of files on filesystem
     Params:
-        hive_holder: HiveHolder
+        hive_holder: ProjectHolder
         block: BlockName
         biiout: biiout
     """

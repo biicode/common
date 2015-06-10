@@ -156,7 +156,7 @@ class CPPImplementationProcessorTest(BiiTestCase):
 
     def _process_from_contents(self, contents):
         '''param contents: dict{name:code snippets}.
-        Will create a HiveHolder, fill with the data and process it'''
+        Will create a ProjectHolder, fill with the data and process it'''
         resources = []
         for name, content in contents.iteritems():
             cell = SimpleCell(name, CPP)
@@ -171,7 +171,7 @@ class CPPImplementationProcessorTest(BiiTestCase):
     def _process_from_files(self, names):
         '''param names: iterable of BlockCellNames. The user will be stripped, and the remaining
         will be loaded from the test folder.
-        Will create a HiveHolder, fill with the data and process it'''
+        Will create a ProjectHolder, fill with the data and process it'''
         block_holder = mother.get_block_holder(names, BiiType(CPP))
         self._process(block_holder)
         return block_holder

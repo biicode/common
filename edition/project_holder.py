@@ -7,7 +7,7 @@ from biicode.common.model.symbolic.block_version_table import BlockVersionTable
 from biicode.common.model.symbolic.block_version import BlockVersion
 
 
-class HiveHolder(object):
+class ProjectHolder(object):
 
     def __init__(self, dict_cells, dict_contents):
         self.hive_dependencies = None  # MUST BE ALWAYS BE ASSIGNED before usage
