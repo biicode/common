@@ -1,7 +1,7 @@
 import unittest
 
 from biicode.common.test.bii_test_case import BiiTestCase
-from biicode.common.edition.hive_manager import HiveManager
+from biicode.common.edition.project_manager import ProjectManager
 from biicode.common.find.finder_result import FinderResult
 from biicode.common.find.policy import Policy
 from biicode.common.model.brl.brl_block import BRLBlock
@@ -21,7 +21,7 @@ class FindRequestTest(BiiTestCase):
     def setUp(self):
         self.testuser = BRLUser('user')
         self.edition_api = TestEditionAPI()
-        self.hive_manager = HiveManager(self.edition_api, None, OutputStream())
+        self.hive_manager = ProjectManager(self.edition_api, None, OutputStream())
         self.block_name = BlockName('dummy/myblock')
 
     def test_compute_request(self):

@@ -7,13 +7,13 @@ from biicode.common.exception import BiiException, NotFoundException
 from biicode.common.deps.block_version_graph import BlockVersionGraph
 from biicode.common.deps.closure_builder import build_closure
 from biicode.common.model.symbolic.block_version_table import BlockVersionTable
-from biicode.common.edition.hive_dependencies import HiveDependencies
+from biicode.common.edition.project_dependencies import ProjectDependencies
 
 
 def blocks_process(hive_holder, biiout):
     """ This function processes the edition blocks of the hive, nothing related with deps.
     It searches resolved-unresolved between edition blocks.
-    param hive_holder: current HiveHolder
+    param hive_holder: current ProjectHolder
     param processor_changes: ProcessorChanges to annotate changes done during process
     param biiout: biiout
     """
@@ -43,7 +43,7 @@ def deps_process(biiapi, hive_holder, biiout, settings=None):
     src_graph, references = compute_src_graph(hive_holder, common_table)
     dep_graph, closure, overwrites = build_closure(biiapi, references, common_table, settings,
                                                    biiout)
-    hive_dependencies = HiveDependencies()
+    hive_dependencies = ProjectDependencies()
     hive_dependencies.src_graph = src_graph  # BlockVersionGraph
     hive_dependencies.dep_graph = dep_graph  # BlockVersionGraph
     hive_dependencies.closure = closure

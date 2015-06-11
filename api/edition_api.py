@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from biicode.common.model.cells import SimpleCell
-from biicode.common.edition.hive_holder import HiveHolder
+from biicode.common.edition.project_holder import ProjectHolder
 
 
 class EditionAPI(object):
@@ -27,7 +27,7 @@ class EditionAPI(object):
         contents = self.read_edition_contents()
         # creation of cells
         cells = {name: SimpleCell(name) for name in contents}
-        hive_holder = HiveHolder(cells, contents)
+        hive_holder = ProjectHolder(cells, contents)
         return hive_holder
 
     def save_hive_changes(self, hive_holder):

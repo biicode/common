@@ -1,5 +1,5 @@
 import unittest
-from biicode.common.edition.hive_holder import HiveHolder
+from biicode.common.edition.project_holder import ProjectHolder
 from biicode.common.model.symbolic.block_version import BlockVersion
 from biicode.common.model.symbolic.block_version_table import BlockVersionTable
 from biicode.common.model.resource import Resource
@@ -15,10 +15,10 @@ bn = BlockVersion.loads('user0/blockb(branch)')
 cn = BlockVersion.loads('user0/blockc: -1')
 
 
-class HiveHolderTest(unittest.TestCase):
+class ProjectHolderTest(unittest.TestCase):
 
     def base_version_test(self):
-        hive_holder = HiveHolder({}, {})
+        hive_holder = ProjectHolder({}, {})
         parents_resource = Resource(SimpleCell(a1.block_name + BIICODE_FILE),
                                     Content(id_=None, load=Blob('[parent]\n ' + str(a1))))
         hive_holder.add_holder(BlockHolder(a1.block_name, {parents_resource}))

@@ -1,5 +1,5 @@
 from biicode.common.model.brl.block_name import BlockName
-from biicode.common.edition.hiveprocessor import blocks_process, deps_process
+from biicode.common.edition.process import blocks_process, deps_process
 from biicode.common.edition.checkin import checkin_files, checkin_block_files
 from biicode.common.exception import BiiException, UpToDatePublishException,\
     PublishException
@@ -8,7 +8,7 @@ from biicode.common.migrations.biiconfig_migration import migrate_bii_config
 from biicode.common.edition.open_close import select_version
 
 
-class HiveManager(object):
+class ProjectManager(object):
     '''This class is the main entry point for operations over bii-model hives,
     i.e. hives on the biicode model and db, NOT in disk. Check the client
     HiveDiskImage for operations over the disk image of a hive'''
